@@ -15,3 +15,121 @@ Contoh gambar dari Network Graph (source: https://towardsdatascience.com/a-tale-
 
 Pada gambar di atas, setiap titik (warna biru) menggambarkan satu node, garis-garis yang menghubungkan antar node (garis berwarna abu) disebut dengan link.
 
+## Penggunaan
+1. Clone repositori ini
+2. Buka index.html yang terdapat dalam direktori Network Graph GOT Book1 dengan server (misalkan menggunakan live-server)
+3. Network Graph akan muncul di web browser
+
+## Penjelasan Projek
+Projek ini bertujuan membuat network diagram dari karakter-karakter yang terdapat dalam Game of Throne Book 1. Data yang digunakan berbentuk `.json` dengan nama file GoTbook1.json. 
+
+```javascript
+{ "nodes": [{"name": "Addam-Marbrand", "group": 1}, {"name": "Aegon-I-Targaryen", "group": 1}, {"name": "Aemon-Targaryen-(Maester-Aemon)", "group": 1}, ...... {"name": "Paxter-Redwyne", "group": 1}, {"name": "Ulf-son-of-Umar", "group": 1}],
+
+"links": [{"source": 0, "target": 69, "value": 3, "group": 1}, {"source": 0, "target": 137, "value": 6, "group": 1}, {"source": 1, "target": 32, "value": 5, "group": 1}, {"source": 1, "target": 42, "value": 4, "group": 1}, {"source": 2, "target": 6, "value": 4, "group": 1}, ..... ,{"source": 138, "target": 180, "value": 18, "group": 1}]
+}
+```
+GoTBook1.json berisi dua buah objek yaitu nodes dan links. Dalam nodes berisi list dari objek 
+
+Terdapat 3 file utama dalam direktori yaitu index.html, index.js, dan style.css. Untuk dapat menggunakan d3 js kita dapat memasukkan cdn dari d3 di file html. Dalam proyek ini, d3 yang digunakan adalah d3 versi 3. Script d3 harus didefinisikan terlebih dahulu sebelum index.js agar kita dapat menggunakan fitur-fitur d3 di dalam index.js.
+
+```html
+<script src="https://d3js.org/d3.v3.js"></script>
+<script src='index.js'></script>
+```
+
+### Pendefinisan force layout
+Dalam file index.js, dibuat sebuah variabel force yang merupakan set up dari force layout:
+```javascript
+var width = 800,
+    height = 700;
+
+var force = d3.layout.force()
+    .charge(-120)
+    .linkDistance(100)
+    .size([width, height]);
+```
+force diambil dari d3.layout kemudian beberapa attribute seperti charge, linkDistance, dan size dibuat. linkDistance didefinisikan untuk mengatur jarak antara node yang saling terhubung. Size adalah ukuran dari layout yang diinginkan. Kita telah membuat variabel width dan height sebelumnya yang akan digunakan untuk mendefinisikan attribute size. Sementara itu, charge digunakan untuk mengurangi *rigidity* dari link. Nilai charge yang negatif mengindikasikan *repulsion*.
+
+### Pendefinisian svg
+```javascript
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+```
+Kita menambahkan variabel svg yang merupakan penambahan svg ke dalam tag body di dalam html. Kita menambahkan juga attribute width dan height untuk svg yang ditambahkan. 
+
+### Membaca File json untuk data node dan link
+
+```javascript
+d3.json('GoTbook1.json', function (data) {
+    force.nodes(data.nodes)
+        .links(data.links)
+        .start();
+
+    var link = svg.selectAll(".link")
+        .data(data.links)
+        .enter().append("line")
+        .attr("class", "link")
+        .style("stroke-width", function (d) {
+            return Math.sqrt(d.value);
+        });
+
+    var node = svg.selectAll(".node")
+        .data(data.nodes)
+        .enter().append("g")
+        .attr("class", "node")
+        .call(force.drag);
+
+    node.append("circle")
+        .attr("r", 3)
+        .style("fill", function (d) {
+            return color(d.group);
+        })
+
+    node.append("text")
+        .attr("dx", 10)
+        .attr("dy", ".35em")
+        .text(function (d) { return d.name });
+
+    force.on("tick", function () {
+        link.attr("x1", function (d) {
+            return d.source.x;
+        })
+            .attr("y1", function (d) {
+                return d.source.y;
+            })
+            .attr("x2", function (d) {
+                return d.target.x;
+            })
+            .attr("y2", function (d) {
+                return d.target.y;
+            });
+
+        //Changed
+
+        d3.selectAll("circle").attr("cx", function (d) {
+            return d.x;
+        })
+            .attr("cy", function (d) {
+                return d.y;
+            });
+
+        d3.selectAll("text").attr("x", function (d) {
+            return d.x;
+        })
+            .attr("y", function (d) {
+                return d.y;
+            });
+
+        //End Changed
+
+    });
+
+}
+)
+```
+
+Kita membaca file json menggunakan d3.json. yang memiliki dua parameter yaitu data yang dibaca dan fungsi yang akan dilakukan terhadap data. Dalam hal ini, data yang dibaca adalah `GoTbook1.json`.
+
+Ketika data sudah dibaca force layout akan ditambah attribute nya yaitu nodes, links, dan start. nodes digunakan untuk membaca seluruh node yang terdapat dalam data agar memiliki efek dari force layout, begitu juga dengan links. 
