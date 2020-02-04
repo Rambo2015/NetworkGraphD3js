@@ -66,7 +66,16 @@ d3.json('GoTbook1.json', function (data) {
     force.nodes(data.nodes)
         .links(data.links)
         .start();
+        
+// another code below
+```
 
+Kita membaca file json menggunakan d3.json. yang memiliki dua parameter yaitu data yang dibaca dan fungsi yang akan dilakukan terhadap data. Dalam hal ini, data yang dibaca adalah `GoTbook1.json`.
+
+Ketika data sudah dibaca, force layout ditambah tiga buah attribute nya yaitu nodes, links, dan start. nodes digunakan untuk membaca seluruh node yang terdapat dalam data agar memiliki efek dari force layout, begitu juga dengan links.
+
+```javascript
+// another code above   
     var link = svg.selectAll(".link")
         .data(data.links)
         .enter().append("line")
@@ -80,7 +89,13 @@ d3.json('GoTbook1.json', function (data) {
         .enter().append("g")
         .attr("class", "node")
         .call(force.drag);
+// another code below
+```
 
+Dibuat juga variabel link dan node, dimana variabel ini masing-masing mendeskripsikan link dan node yang akan ditambahkan pada svg. Pendefinisian variabel link akan menambahkan shape line pada svg sebanyak data link pada file json. Sedangkan variabel node, pertama-tama akan ditambahkan group sebanyak jumlah data node yang terdapat pada file json.
+
+```javascript
+// another code above
     node.append("circle")
         .attr("r", 3)
         .style("fill", function (d) {
@@ -91,7 +106,11 @@ d3.json('GoTbook1.json', function (data) {
         .attr("dx", 10)
         .attr("dy", ".35em")
         .text(function (d) { return d.name });
+// another code below
+```
+Pada masing-masing group ditambahkan shape circle, dengan attribute radius 3 dan fill sesuai dengan group yang terdapat dalam data node dengan menggunakan scale color yang telah dibuat setelah pendefinisian width dan height. Ditambahkan juga text pada node dimana teks ini akan memunculkan data name dari data json.
 
+```javascript
     force.on("tick", function () {
         link.attr("x1", function (d) {
             return d.source.x;
@@ -129,7 +148,4 @@ d3.json('GoTbook1.json', function (data) {
 }
 )
 ```
-
-Kita membaca file json menggunakan d3.json. yang memiliki dua parameter yaitu data yang dibaca dan fungsi yang akan dilakukan terhadap data. Dalam hal ini, data yang dibaca adalah `GoTbook1.json`.
-
-Ketika data sudah dibaca force layout akan ditambah attribute nya yaitu nodes, links, dan start. nodes digunakan untuk membaca seluruh node yang terdapat dalam data agar memiliki efek dari force layout, begitu juga dengan links. 
+Kode diatas bermanfaat untuk membuat node dan link dapat di drag.
